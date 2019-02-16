@@ -1,0 +1,2 @@
+FOR /F "delims=*" %%A IN ('dir /b *.MP4') DO "D:\downloads\ffmpeg-20180816-fe06ed2-win64-static\ffmpeg-20180816-fe06ed2-win64-static\bin\ffmpeg.exe" -i "%%A" -map 0 -ac:2 1 -ab 192k -filter:a "volume=0.5" -c:v copy "mono audio\%%A"
+pause

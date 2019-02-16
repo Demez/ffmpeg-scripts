@@ -1,0 +1,2 @@
+FOR /F "delims=*" %%A IN ('dir /b *.MP4') DO "D:\downloads\ffmpeg-20180816-fe06ed2-win64-static\ffmpeg-20180816-fe06ed2-win64-static\bin\ffmpeg.exe" -i "%%A" -filter_complex "[0:1]volume=1.0[1];[0:2]volume=4.0[2]; [1][2]amerge=inputs=2" -c:a aac -b:a 192k -c:v copy "merged audio\%%A"
+pause
