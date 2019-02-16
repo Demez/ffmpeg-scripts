@@ -1,6 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
+set "ffmpegDir=C:\demez_archive\video_editing\ffmpeg\current\bin\"
+
 @REM ok i need to start using python now holy shit this is a FUCKING MESS
 
 IF "%*"=="" (
@@ -16,9 +18,7 @@ IF "%*"=="" (
 )
 
 @REM ----------------------------------------------------------------
-
-echo fake quotes:
-echo.
+@REM this could probably be cleaned up a bit, idk
 
 @REM input file
 set "FakeQuote="
@@ -56,27 +56,29 @@ for %%a in ('%*') do (
 echo Input File:	%input%
 echo Output File:	%ouput%
 echo Commands:	%commands%
+echo -----------------------------------------------------------------------------------------
+echo.
 
+!ffmpegDir!ffmpeg.exe -i "%input%" %commands% "%ouput%"
 
-pause
+if not %ERRORLEVEL%==0 (
+	echo.
+	echo -----------------------------------------
+	echo An error has occurred, press any key to exit
+	pause >nul
+)
 exit
 
 
 :findFile inout quote
-echo %~1
+@REM so what this does is look for a string within the currently selected string
+@REM they are used to determine the start and end of a line
+@REM used for finding the input, the output, and the commands
 if !lineStart!==-%~1 (
-	echo.
 	set foundFakeQuote=1
-	echo !currentSelection!
-	echo starting
-	echo.
 )
 
 if !lineEnd!==%~2 (
-	echo.
-	echo !currentSelection!
-	echo ending
-	echo.
 	set foundFakeQuote=0
 	set "FakeQuote=!FakeQuote!"
 )
@@ -98,8 +100,3 @@ if %~1==c (
 )
 
 EXIT /B 0
-
-
-
-
-pause

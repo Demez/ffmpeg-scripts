@@ -5,8 +5,10 @@
 setlocal enabledelayedexpansion
 
 set "ffmpegDir=C:\demez_archive\video_editing\ffmpeg\current\bin\"
-@REM set "settings=-y -map 0 -c:a copy -c:v libx265 -crf 8 -preset medium"
-set "settings=-y -map 0 -c:a copy -c:v libx265 -crf 8 -preset medium"
+
+@REM temp thing for testing
+set "crfLevel=14"
+set "settings=-map 0 -c:a copy -c:v libx265 -preset medium -crf"
 @REM set "settings=-y -map 0 -c:a copy -c:v libx265 -x265-params lossless=1 -preset medium"
 @REM just makes the file bigger
 
@@ -27,14 +29,14 @@ FOR /F "delims=*" %%A IN ('dir /b *.MKV') DO (
 	!ffmpegDir!ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "%%A" >codec.temp
 	set /p codec= <codec.temp
 	
-	if not !codec!==h264 (
+	if not !codec!==hevc (
 		del codec.temp
 		
 		if not exist "raw\" MD "raw"
-		@REM eif not exist "raw\%%A" (
-			@REM emove "%%A" "raw\%%A" >nul
-			@REM echo Moved to raw folder
-		@REM e)
+		if not exist "raw\%%A" (
+			@REM move "%%A" "raw\%%A" >nul
+			echo Moved to raw folder
+		)
 		
 		echo Encoding from:		!codec! --^> hevc
 		
@@ -42,20 +44,18 @@ FOR /F "delims=*" %%A IN ('dir /b *.MKV') DO (
 		echo|set /p="Video Duration:		"
 		!ffmpegDir!ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "%%A"
 		
-		@REM !ffmpegDir!ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "raw\%%A"
-		
 		@REM shows the progress of ffmpeg
 		if !externalProgress!==1 (
-			@REM start /WAIT cmd /c !ffmpegDir!ffmpeg.exe -i "%%A" !settings! "%%~nA - crf 64.mkv"
+			@REM start /WAIT cmd /c !ffmpegDir!ffmpeg.exe -i "%%A" !settings! "%%~nA - crf 64.mkv"		
 			
-			@REM calls a ffmpeg batch file with these commands
-			@REM start /WAIT cmd /c !ffmpegDir!ffmpeg.exe -i "%%A" !settings! "%%~nA - crf 64.mkv"
-			set ffmpegLaunch=!ffmpegDir!ffmpeg.exe -i "%%A" !settings! "%%~nA - crf 64.mkv"
-			SET "quoteInput=%%A"
+			start /WAIT cmd /c "ffmpeg.bat" !ffmpegDir! -i %%A# -o %%~nA - crf !crfLevel!.mkv$ -c !settings! !crfLevel! @
+			start /WAIT cmd /c "ffmpeg.bat" !ffmpegDir! -i %%A# -o %%~nA - crf 16.mkv$ -c !settings! 16 @
+			start /WAIT cmd /c "ffmpeg.bat" !ffmpegDir! -i %%A# -o %%~nA - crf 18.mkv$ -c !settings! 18 @
 			
-			
-			start /WAIT cmd /k "ffmpeg.bat" !ffmpegDir! -i %%A# -o new/the n word 27 times.mkv$ -c !settings! @
-			pause
+			@REM shows the last line of ffmpeg, need to add soon
+			@REM -report
+			@REM this command outputs the full command line output of ffmpeg into a log
+			@REM i will set up something to read it, get the last line, and show it here
 		) else (
 			!ffmpegDir!ffmpeg.exe -i "%%A" !settings! "%%A"
 		)
